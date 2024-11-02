@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2024-11-02T18:43:23+01:00",
+  "id": "Proyecto 1.2",
+  "duration": 0,
+  "title": "Seguridad del Arranque en Debian",
+  "summary": "Resumen del CodeLab",
+  "source": "CodeLab.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "codelab",
+    "markdown"
+  ],
+  "tags": [
+    "web"
+  ],
+  "url": "Proyecto 1.2"
+}

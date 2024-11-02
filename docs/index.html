@@ -1,0 +1,112 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Seguridad del Arranque en Debian</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="Proyecto 1.2"
+                  title="Seguridad del Arranque en Debian"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Introducción" duration="0">
+        <p>La seguridad del arranque es un aspecto crítico en la administración de sistemas operativos, especialmente en entornos donde la protección de datos y la integridad del sistema son prioritarias. Un arranque seguro no solo previene accesos no autorizados, sino que también protege contra modificaciones maliciosas que podrían comprometer la estabilidad y la seguridad de todo el sistema.</p>
+<p>Esta guía tiene como objetivo proporcionar un enfoque detallado para bastionar el proceso de arranque en un sistema Debian, abordando aspectos clave como la ocultación del menú de GRUB, la configuración de contraseñas, la creación de copias de seguridad y otras medidas de seguridad adicionales.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Ocultación del Menú de Arranque" duration="0">
+        <p>Ocultar el menú de GRUB  es esencial para prevenir que un atacante acceda a opciones de recuperación o modifique parámetros de arranque. Primero, abre una terminal y edita el archivo de configuración de GRUB con el siguiente comando:</p>
+<pre><code>sudo nano /etc/default/grub
+</code></pre>
+<p>En este archivo, busca o añade las líneas &#34;GRUB_TIMEOUT=0&#34; y &#34;GRUB_TIMEOUT_STYLE=hidden&#34;. Esto significa que no habrá tiempo de espera para mostrar el menú y este estará oculto. Guarda los cambios presionando Ctrl+X, luego Y, y finalmente Enter.</p>
+<p>Para aplicar estos cambios, actualiza la configuración de GRUB con:</p>
+<pre><code>sudo update-grub
+</code></pre>
+<p>Reinicia tu sistema para verificar que el menú no se muestre.</p>
+<p class="image-container"><img alt="Descripción de la imagen" src="img\\1a92f676841676b5.PNG"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configuración de Contraseña de Arranque." duration="0">
+        <p>Establecer una contraseña en GRUB es crucial para evitar modificaciones no autorizadas. Para hacerlo, primero genera un hash de la contraseña:</p>
+<pre><code>grub-mkpasswd-pbkdf2
+</code></pre>
+<p>Introduce y confirma tu contraseña. El sistema generará un hash que deberás copiar.</p>
+<p class="image-container"><img alt="Descripción de la imagen" src="img\\92f5d1cdf1e72585.PNG"></p>
+<p>A continuación, edita el archivo &#34;/etc/grub.d/40_custom&#34;:</p>
+<pre><code>sudo nano /etc/grub.d/40_custom
+</code></pre>
+<p>Añade las siguientes líneas al final del archivo:</p>
+<pre><code>set superusers=&#34;admin&#34;
+password_pbkdf2 admin [hash_generado]
+</code></pre>
+<p>Reemplaza &#34;[hash_generado]&#34; con el hash que obtuviste anteriormente. Guarda los cambios y cierra el editor.</p>
+<p>Actualizar GRUB nuevamente con:</p>
+<pre><code>sudo update-grub
+</code></pre>
+<p>Reinicia tu sistema para confirmar que la contraseña ahora es requerida para modificar las opciones de arranque.</p>
+<p class="image-container"><img alt="Descripción de la imagen" src="img\\16941b7f8a8d7b33.PNG"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Copia de Seguridad de la Configuración." duration="0">
+        <p>Es fundamental tener copias de seguridad de la configuración del arranque para poder restaurarla en caso de problemas. Para crear una copia de seguridad, primero copia los archivos relevantes:</p>
+<pre><code>sudo cp /boot/grub/grub.cfg /boot/grub/grub.cfg.backup
+sudo cp /etc/default/grub /etc/default/grub.backup
+</code></pre>
+<p>Luego, puedes crear un archivo comprimido que contenga todos los archivos importantes:</p>
+<pre><code>sudo tar -czvf grub_config_backup.tar.gz /boot/grub/grub.cfg /etc/default/grub /etc/grub.d/
+</code></pre>
+<p>Asegúrate de mover esta copia a un lugar seguro, como un dispositivo externo o un servicio en la nube.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Otras Opciones de Seguridad" duration="0">
+        <p>Deshabilitar el Arranque desde Dispositivos Externos Para evitar que un atacante inicie desde un dispositivo USB o similar, accede a la BIOS/UEFI durante el arranque (normalmente presionando F2, F12 o Del). Busca la sección donde puedes modificar el orden de arranque y desactiva o mueve los dispositivos externos al final de la lista. Guarda los cambios antes de salir.</p>
+<h2 is-upgraded>Activar Secure Boot</h2>
+<p>Si tu hardware lo permite, activa Secure Boot en la BIOS/UEFI. Esta opción previene que software no firmado arranque en tu sistema. Asegúrate de que Debian sea compatible con Secure Boot antes de activarlo.</p>
+<h2 is-upgraded>Cifrado de Disco Completo</h2>
+<p>Si estás instalando Debian por primera vez, selecciona la opción de cifrado completo durante la instalación. Si ya tienes Debian instalado, considera usar LUKS para cifrar particiones existentes. Este proceso es más complejo y puede requerir copias de seguridad previas.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Conclusión" duration="0">
+        <p>Implementar medidas adecuadas para bastionar el arranque en un sistema Debian es fundamental para proteger tanto los datos como la integridad del sistema operativo. Al ocultar el menú de GRUB, establecer contraseñas seguras y realizar copias de seguridad regulares, se puede mitigar significativamente el riesgo de accesos no autorizados y modificaciones maliciosas. Además, considerar opciones como deshabilitar el arranque desde dispositivos externos y activar Secure Boot proporciona capas adicionales de seguridad. Al seguir esta guía, estarás mejor preparado para mantener tu sistema Debian seguro y protegido frente a amenazas potenciales.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
